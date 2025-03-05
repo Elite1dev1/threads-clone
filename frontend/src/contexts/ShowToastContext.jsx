@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react';
-import { useToast } from '@chakra-ui/react';
+import { createContext, useContext } from "react";
+import { useToast } from "@chakra-ui/react";
 
 const ShowToastContext = createContext();
 
@@ -13,7 +13,7 @@ export const ShowToastProvider = ({ children }) => {
       status,
       duration: 3000,
       isClosable: true,
-      position: "top-right"
+      position: "top-right",
     });
   };
 
@@ -27,7 +27,7 @@ export const ShowToastProvider = ({ children }) => {
 export const useShowToast = () => {
   const context = useContext(ShowToastContext);
   if (context === undefined) {
-    throw new Error('useShowToast must be used within a ShowToastProvider');
+    throw new Error("useShowToast must be used within a ShowToastProvider");
   }
   return context;
-}; 
+};
