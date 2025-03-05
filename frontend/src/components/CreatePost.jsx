@@ -55,30 +55,50 @@ const CreatePost = () => {
 	};
 
 	const handleCreatePost = async () => {
-		setLoading(true);
+		if (!postText.trim() && !imgUrl) {
+			showToast("Error", "Post cannot be empty", "error");
+			return;
+		}
+
 		try {
-			const res = await fetch("/api/posts/create", {
+			setLoading(true);
+			
+			// Validate image URL if present
+			if (imgUrl && !imgUrl.startsWith('data:image/') && !imgUrl.startsWith('http')) {
+				throw new Error('Invalid image format');
+			}
+
+			const response = await fetch("/api/posts/create", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ postedBy: user._id, text: postText, img: imgUrl }),
+				body: JSON.stringify({
+					text: postText,
+					img: imgUrl,
+				}),
+				credentials: 'include', // Add this to ensure cookies are sent
 			});
 
-			const data = await res.json();
-			if (data.error) {
-				showToast("Error", data.error, "error");
-				return;
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.error || "Failed to create post");
 			}
+
 			showToast("Success", "Post created successfully", "success");
-			if (username === user.username) {
-				setPosts([data, ...posts]);
-			}
-			onClose();
 			setPostText("");
 			setImgUrl("");
+			onClose();
+			
+			// Update posts state if needed
+			if (typeof setPosts === "function") {
+				setPosts(prev => [data, ...prev]);
+			}
+
 		} catch (error) {
-			showToast("Error", error, "error");
+			showToast("Error", error.message, "error");
+			console.error("Error creating post:", error);
 		} finally {
 			setLoading(false);
 		}
